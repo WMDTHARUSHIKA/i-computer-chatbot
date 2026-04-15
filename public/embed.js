@@ -1,6 +1,8 @@
+// embed.js (updated colors: bg #000000, icon #F1F0E9)
 (function () {
   const WIDGET_URL = "https://i-computer-chatbot.vercel.app/?embed=1"; // must be absolute
-  const PRIMARY = "#6d5dfc";
+  const PRIMARY = "#000000";
+  const ICON = "#F1F0E9";
 
   if (document.getElementById("icw-launcher") || document.getElementById("icw-frame")) return;
 
@@ -9,11 +11,13 @@
     #icw-launcher{
       position:fixed; right:24px; bottom:24px; width:56px; height:56px;
       border-radius:999px; border:0; cursor:pointer; z-index:999999;
-      background:${PRIMARY}; color:#fff;
+      background:${PRIMARY}; color:${ICON};
       box-shadow:0 18px 40px rgba(0,0,0,.22);
       display:flex; align-items:center; justify-content:center;
+      transition: background .15s ease;
     }
-    #icw-launcher svg{ width:24px; height:24px; fill:#fff; }
+    #icw-launcher:hover{ background:#111111; }
+    #icw-launcher svg{ width:24px; height:24px; fill:${ICON}; }
 
     #icw-frame{
       position:fixed; right:24px; bottom:92px; width:380px; height:560px;
@@ -33,6 +37,8 @@
   frame.id = "icw-frame";
   frame.src = WIDGET_URL;
   frame.allow = "clipboard-write";
+  frame.style.background = "transparent";
+  frame.setAttribute("loading", "lazy");
   document.body.appendChild(frame);
 
   const btn = document.createElement("button");
