@@ -1,25 +1,19 @@
 // public/embed.js
 (function () {
-  // ✅ Chatbot URL (embed mode opens chat UI immediately)
+  // ✅ Chatbot URL (embed mode opens chat UI immediately inside iframe)
   const WIDGET_URL = "https://i-computer-chatbot.vercel.app/?embed=1";
 
-  // ✅ Colors
+  // Colors
   const BG = "#000000";
   const FG = "#F1F0E9";
   const HOVER = "#111111";
 
-  // ✅ Layout
+  // Layout
   const GAP = 24;
-  const BTN = 56; // button size
+  const BTN = 56;
 
-  // prevent double injection
-  if (
-    document.getElementById("icw-launcher") ||
-    document.getElementById("icw-frame") ||
-    document.getElementById("icw-close")
-  ) {
-    return;
-  }
+  // Prevent double injection
+  if (document.getElementById("icw-launcher") || document.getElementById("icw-frame")) return;
 
   const CHAT_SVG = `
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -27,29 +21,17 @@
     </svg>
   `;
 
+  // ✅ Close "X" icon (like your image)
   const CLOSE_SVG = `
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4Z"/>
+      <path d="M6 6L18 18" fill="none" stroke="${FG}" stroke-width="2.8" stroke-linecap="round"/>
+      <path d="M18 6L6 18" fill="none" stroke="${FG}" stroke-width="2.8" stroke-linecap="round"/>
     </svg>
   `;
 
   const style = document.createElement("style");
   style.textContent = `
-    #icw-frame{
-      position:fixed;
-      right:${GAP}px;
-      bottom:${GAP + BTN + 12}px; /* leave space for close button below */
-      width:380px;
-      height:560px;
-      border:0;
-      border-radius:22px;
-      z-index:999999;
-      box-shadow:0 24px 60px rgba(0,0,0,.22);
-      display:none;
-      background:transparent;
-    }
-
-    #icw-launcher, #icw-close{
+    #icw-launcher{
       position:fixed;
       right:${GAP}px;
       bottom:${GAP}px;
@@ -65,24 +47,29 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      transition: background .15s ease, transform .15s ease, opacity .15s ease;
+      transition: background .15s ease, transform .15s ease;
+      -webkit-tap-highlight-color: transparent;
     }
+    #icw-launcher:hover{ background:${HOVER}; transform: translateY(-1px); }
+    #icw-launcher:active{ transform: translateY(0); }
 
-    #icw-launcher:hover, #icw-close:hover{
-      background:${HOVER};
-      transform: translateY(-1px);
+    #icw-launcher svg{ width:26px; height:26px; display:block; }
+    #icw-launcher .icw-chat svg path{ fill:${FG}; }
+    /* close svg uses stroke already */
+
+    #icw-frame{
+      position:fixed;
+      right:${GAP}px;
+      bottom:${GAP + BTN + 12}px;
+      width:380px;
+      height:560px;
+      border:0;
+      border-radius:22px;
+      z-index:999999;
+      box-shadow:0 24px 60px rgba(0,0,0,.22);
+      display:none;
+      background:transparent;
     }
-    #icw-launcher:active, #icw-close:active{ transform: translateY(0); }
-
-    #icw-launcher svg, #icw-close svg{
-      width:26px;
-      height:26px;
-      fill:${FG};
-      display:block;
-    }
-
-    /* close button hidden by default */
-    #icw-close{ display:none; }
 
     @media (max-width:420px){
       #icw-frame{
@@ -93,7 +80,7 @@
         bottom:${12 + BTN + 12}px;
         border-radius:18px;
       }
-      #icw-launcher, #icw-close{
+      #icw-launcher{
         right:12px;
         bottom:12px;
       }
@@ -111,36 +98,33 @@
   frame.setAttribute("title", "Chat widget");
   document.body.appendChild(frame);
 
-  // launcher (chat icon)
-  const launcher = document.createElement("button");
-  launcher.id = "icw-launcher";
-  launcher.type = "button";
-  launcher.setAttribute("aria-label", "Open chat");
-  launcher.innerHTML = CHAT_SVG;
-  document.body.appendChild(launcher);
-
-  // close button (X) — shows AFTER opening chat space
-  const closeBtn = document.createElement("button");
-  closeBtn.id = "icw-close";
-  closeBtn.type = "button";
-  closeBtn.setAttribute("aria-label", "Close chat");
-  closeBtn.innerHTML = CLOSE_SVG;
-  document.body.appendChild(closeBtn);
+  // single button (toggles icon)
+  const btn = document.createElement("button");
+  btn.id = "icw-launcher";
+  btn.type = "button";
+  btn.setAttribute("aria-label", "Open chat");
+  btn.innerHTML = `<span class="icw-chat">${CHAT_SVG}</span>`;
+  document.body.appendChild(btn);
 
   const openChat = () => {
     frame.style.display = "block";
-    launcher.style.display = "none";
-    closeBtn.style.display = "flex";
+    btn.setAttribute("aria-label", "Close chat");
+    btn.innerHTML = `<span class="icw-close">${CLOSE_SVG}</span>`;
   };
 
   const closeChat = () => {
     frame.style.display = "none";
-    closeBtn.style.display = "none";
-    launcher.style.display = "flex";
+    btn.setAttribute("aria-label", "Open chat");
+    btn.innerHTML = `<span class="icw-chat">${CHAT_SVG}</span>`;
   };
 
-  launcher.addEventListener("click", openChat);
-  closeBtn.addEventListener("click", closeChat);
+  const toggle = () => {
+    const isOpen = frame.style.display === "block";
+    if (isOpen) closeChat();
+    else openChat();
+  };
+
+  btn.addEventListener("click", toggle);
 
   // ESC closes
   window.addEventListener("keydown", (e) => {
