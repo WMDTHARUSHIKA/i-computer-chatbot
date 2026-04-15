@@ -20,7 +20,7 @@
     font-family: "Inter", sans-serif;
 
     /* Normal (non-embed) background */
-    background: linear-gradient(180deg, #f2efff 0%, #dcd6ff 100%);
+    background: #f1f0e9;
   }
 
   /* ✅ When loaded inside iframe as ?embed=1 */
@@ -38,21 +38,29 @@
 
   /* Launcher button */
   .chatbot-launcher {
-    @apply w-12 h-12 rounded-full bg-[#6d5dfc] text-white
-           shadow-[0_18px_40px_rgba(17,24,39,0.22)]
-           flex items-center justify-center hover:bg-[#5b4cd1] transition-colors;
+    @apply w-12 h-12 rounded-full flex items-center justify-center transition-colors;
+    background: #000000;
+    color: #f1f0e9;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+  }
+  .chatbot-launcher:hover {
+    background: #111111;
   }
 
   /* Popup card */
   .chatbot-popup {
-    @apply w-[360px] h-[560px] bg-white rounded-[22px] overflow-hidden
-           shadow-[0_24px_60px_rgba(17,24,39,0.18)]
-           flex flex-col border border-black/5;
+    @apply w-[360px] h-[560px] overflow-hidden flex flex-col border;
+    background: #f1f0e9;
+    border-color: rgba(0, 0, 0, 0.12);
+    border-radius: 22px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
   }
 
   /* Header */
   .chat-header {
-    @apply bg-[#6d5dfc] text-white px-5 py-4 flex items-center justify-between;
+    @apply px-5 py-4 flex items-center justify-between;
+    background: #000000;
+    color: #f1f0e9;
   }
 
   .header-info {
@@ -60,7 +68,10 @@
   }
 
   .header-icon-container {
-    @apply w-9 h-9 rounded-full bg-white/20 flex items-center justify-center;
+    @apply w-9 h-9 rounded-full flex items-center justify-center border;
+    background: #f1f0e9;
+    border-color: rgba(241, 240, 233, 0.35);
+    color: #000000;
   }
 
   .logo-text {
@@ -68,21 +79,26 @@
   }
 
   .header-arrow {
-    @apply text-white/90 hover:text-white transition-colors;
+    @apply transition-colors;
+    color: rgba(241, 240, 233, 0.85);
+  }
+  .header-arrow:hover {
+    color: #f1f0e9;
   }
 
   /* Body */
   .chatbot-body {
-    @apply flex-1 overflow-y-auto px-5 py-5 space-y-5 bg-white;
+    @apply flex-1 overflow-y-auto px-5 py-5 space-y-5;
+    background: #f1f0e9;
   }
 
   .chatbot-body::-webkit-scrollbar {
     width: 10px;
   }
   .chatbot-body::-webkit-scrollbar-thumb {
-    background: rgba(109, 93, 252, 0.22);
+    background: rgba(0, 0, 0, 0.18);
     border-radius: 999px;
-    border: 3px solid #fff;
+    border: 3px solid #f1f0e9;
   }
 
   .message {
@@ -98,7 +114,9 @@
   }
 
   .bot-icon-wrapper {
-    @apply w-9 h-9 rounded-full bg-[#6d5dfc] flex items-center justify-center flex-shrink-0;
+    @apply w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0;
+    background: #000000;
+    color: #f1f0e9;
   }
 
   .message-text-container {
@@ -106,42 +124,59 @@
   }
 
   .message-text {
-    @apply px-4 py-3 text-[13px] leading-relaxed;
+    @apply px-4 py-3 text-[13px] leading-relaxed border;
+    border-radius: 16px;
+    border-color: rgba(0, 0, 0, 0.12);
   }
 
   /* Bot bubble */
   .bot-message .message-text {
-    @apply bg-[#f3f1ff] text-gray-800 rounded-[16px] rounded-bl-[6px];
+    background: rgba(255, 255, 255, 0.6);
+    color: #000000;
+    border-bottom-left-radius: 6px;
   }
 
   /* User bubble */
   .user-message .message-text {
-    @apply bg-[#6d5dfc] text-white rounded-[16px] rounded-br-[6px];
+    background: #000000;
+    color: #f1f0e9;
+    border-color: rgba(0, 0, 0, 0.22);
+    border-bottom-right-radius: 6px;
   }
 
-  /* Error state (if you add chat.isError) */
+  /* Error state */
   .error .message-text {
-    @apply bg-red-50 text-red-700 border border-red-200;
+    background: #fff1f1;
+    color: #b00020;
+    border-color: rgba(176, 0, 32, 0.25);
   }
 
   /* Footer */
   .chat-footer {
-    @apply p-5 bg-white;
+    @apply p-4 border-t shrink-0;
+    background: #f1f0e9;
+    border-color: rgba(0, 0, 0, 0.12);
   }
 
   .chat-form {
-    @apply flex items-center bg-white rounded-full border border-gray-200
-           px-4 py-2 shadow-sm;
+    @apply w-full flex items-center gap-2 rounded-2xl px-3 py-2 border;
+    background: #f1f0e9;
+    border-color: rgba(0, 0, 0, 0.22);
   }
 
   .message-input {
-    @apply flex-1 bg-transparent outline-none border-none text-sm text-gray-700 placeholder-gray-400;
+    @apply flex-1 bg-transparent outline-none border-none text-sm placeholder-gray-500;
+    color: #000000;
     min-width: 0;
   }
 
   .send-btn {
-    @apply w-10 h-10 rounded-full bg-[#6d5dfc] text-white flex items-center justify-center
-           ml-3 hover:bg-[#5b4cd1] transition-colors;
+    @apply w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors;
+    background: #000000;
+    color: #f1f0e9;
+  }
+  .send-btn:hover {
+    background: #111111;
   }
 
   .send-btn:disabled {
