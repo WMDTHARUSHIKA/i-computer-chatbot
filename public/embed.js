@@ -1,5 +1,5 @@
 (function () {
-  const WIDGET_URL = "https://i-computer-chatbot.vercel.app/?embed=1"; // must be absolute
+  const WIDGET_URL = "https://i-computer-chatbot-p5019lv1e.vercel.app/"; // must be absolute
   const PRIMARY = "#6d5dfc";
 
   if (document.getElementById("icw-launcher") || document.getElementById("icw-frame")) return;

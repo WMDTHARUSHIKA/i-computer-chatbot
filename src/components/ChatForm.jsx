@@ -15,24 +15,25 @@ export default function ChatForm({ onSend, disabled = false }) {
   };
 
   return (
-    <form className="icw-form" onSubmit={handleSubmit}>
+    <form className="chat-form" onSubmit={handleSubmit}>
       <input
         ref={inputRef}
-        className="icw-input"
         type="text"
         placeholder="Write message"
+        className="message-input"
         autoComplete="off"
         disabled={disabled}
         required
       />
+
       <button
-        className="icw-send"
         type="submit"
+        className="send-btn material-symbols-rounded"
         disabled={disabled}
         aria-label="Send"
         title="Send"
       >
-        <span className="material-symbols-rounded">send</span>
+        send
       </button>
     </form>
   );
