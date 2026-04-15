@@ -1,25 +1,19 @@
 import ChatbotIcon from "./ChatbotIcon";
 
-const ChatMessage = ({ chat }) => {
+export default function ChatMessage({ chat }) {
+  const isBot = chat.role === "model";
+
   return (
-    <div
-      className={`message ${chat.role === "model" ? "bot" : "user"}-message ${
-        chat.isError ? "error" : ""
-      }`}
-    >
-      {chat.role === "model" && (
-        <div className="bot-icon-wrapper">
-          <ChatbotIcon className="text-white" />
+    <div className={`icw-msg ${isBot ? "icw-bot" : "icw-user"} ${chat.isError ? "icw-error" : ""}`}>
+      {isBot && (
+        <div className="icw-bot-avatar" aria-hidden="true">
+          <ChatbotIcon className="icw-bot-avatar-icon" />
         </div>
       )}
 
-      <div className="message-text-container">
-        <p className="message-text" style={{ whiteSpace: "pre-line" }}>
-          {chat.text}
-        </p>
+      <div className="icw-bubble" style={{ whiteSpace: "pre-line" }}>
+        {chat.text}
       </div>
     </div>
   );
-};
-
-export default ChatMessage;
+}

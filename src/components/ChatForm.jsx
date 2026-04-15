@@ -1,6 +1,6 @@
 import { useRef } from "react";
 
-const ChatForm = ({ onSend, disabled = false }) => {
+export default function ChatForm({ onSend, disabled = false }) {
   const inputRef = useRef(null);
 
   const handleSubmit = (e) => {
@@ -15,27 +15,25 @@ const ChatForm = ({ onSend, disabled = false }) => {
   };
 
   return (
-    <form className="chat-form" onSubmit={handleSubmit}>
+    <form className="icw-form" onSubmit={handleSubmit}>
       <input
         ref={inputRef}
+        className="icw-input"
         type="text"
-        placeholder={disabled ? "Please wait..." : "Message i-Computer Web..."}
-        className="message-input"
-        required
+        placeholder="Write message"
         autoComplete="off"
         disabled={disabled}
+        required
       />
       <button
+        className="icw-send"
         type="submit"
-        className="send-btn material-symbols-rounded"
         disabled={disabled}
-        aria-disabled={disabled}
-        aria-label="Send message"
+        aria-label="Send"
+        title="Send"
       >
-        arrow_upward
+        <span className="material-symbols-rounded">send</span>
       </button>
     </form>
   );
-};
-
-export default ChatForm;
+}

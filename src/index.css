@@ -8,35 +8,44 @@
     color-scheme: light;
   }
 
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
   body {
     margin: 0;
     min-height: 100vh;
     font-family: "Inter", sans-serif;
-
-    /* light purple background like your screenshot */
     background: linear-gradient(180deg, #f2efff 0%, #dcd6ff 100%);
+  }
+
+  /* ✅ EMBED MODE: remove the background (transparent) */
+  html.chat-embed,
+  body.chat-embed {
+    background: transparent !important;
+    min-height: 0 !important;
   }
 }
 
 @layer components {
-  /* Optional: if your root uses a container */
-  .container {
-    @apply min-h-screen flex items-center justify-center p-4;
-  }
-
-  /* Bottom-right widget area */
   .chatbot-wrapper {
     @apply fixed bottom-8 right-8 z-50 flex flex-col items-end;
   }
 
-  /* The popup card */
+  .chatbot-launcher {
+    @apply w-12 h-12 rounded-full bg-[#6d5dfc] text-white
+           shadow-[0_18px_40px_rgba(17,24,39,0.22)]
+           flex items-center justify-center hover:bg-[#5b4cd1] transition-colors;
+  }
+
   .chatbot-popup {
     @apply w-[360px] h-[560px] bg-white rounded-[22px] overflow-hidden
            shadow-[0_24px_60px_rgba(17,24,39,0.18)]
            flex flex-col border border-black/5;
   }
 
-  /* Header */
   .chat-header {
     @apply bg-[#6d5dfc] text-white px-5 py-4 flex items-center justify-between;
   }
@@ -57,28 +66,16 @@
     @apply text-white/90 hover:text-white transition-colors;
   }
 
-  /* Body */
   .chatbot-body {
     @apply flex-1 overflow-y-auto px-5 py-5 space-y-5 bg-white;
-  }
-
-  .chatbot-body::-webkit-scrollbar {
-    width: 10px;
-  }
-  .chatbot-body::-webkit-scrollbar-thumb {
-    background: rgba(109, 93, 252, 0.22);
-    border-radius: 999px;
-    border: 3px solid #fff;
   }
 
   .message {
     @apply flex items-end gap-2;
   }
-
   .bot-message {
     @apply flex-row;
   }
-
   .user-message {
     @apply flex-row-reverse;
   }
@@ -95,17 +92,14 @@
     @apply px-4 py-3 text-[13px] leading-relaxed;
   }
 
-  /* Bot bubble (very light purple) */
   .bot-message .message-text {
     @apply bg-[#f3f1ff] text-gray-800 rounded-[16px] rounded-bl-[6px];
   }
 
-  /* User bubble */
   .user-message .message-text {
     @apply bg-[#6d5dfc] text-white rounded-[16px] rounded-br-[6px];
   }
 
-  /* Footer (input only look) */
   .chat-footer {
     @apply p-5 bg-white;
   }
@@ -120,46 +114,23 @@
     min-width: 0;
   }
 
-  /* If you still keep the send button, keep it subtle */
   .send-btn {
     @apply w-10 h-10 rounded-full bg-[#6d5dfc] text-white flex items-center justify-center
            ml-3 hover:bg-[#5b4cd1] transition-colors;
   }
 
-  .send-btn:disabled {
-    @apply opacity-60 cursor-not-allowed;
-  }
-  .message-input:disabled {
-    @apply opacity-70 cursor-not-allowed;
-  }
-
-  /* Close button like the screenshot (purple circle with X under the popup) */
-  .chatbot-close-fab {
-    @apply mt-5 w-12 h-12 rounded-full bg-[#6d5dfc] text-white
-           shadow-[0_18px_40px_rgba(17,24,39,0.22)]
-           flex items-center justify-center hover:bg-[#5b4cd1] transition-colors;
+  /* ✅ EMBED MODE helpers */
+  .chatbot-embed-root {
+    width: 100%;
+    height: 100%;
   }
 
-  /* Launcher button when closed */
-  .chatbot-launcher {
-    @apply w-12 h-12 rounded-full bg-[#6d5dfc] text-white
-           shadow-[0_18px_40px_rgba(17,24,39,0.22)]
-           flex items-center justify-center hover:bg-[#5b4cd1] transition-colors;
-  }
-
-  /* Mobile: make it fit screen nicely */
-  @media (max-width: 420px) {
-    .chatbot-wrapper {
-      @apply bottom-4 right-4 left-4 items-stretch;
-    }
-
-    .chatbot-popup {
-      @apply w-auto h-[74vh];
-    }
-
-    .chatbot-close-fab,
-    .chatbot-launcher {
-      @apply self-end;
-    }
+  /* ✅ popup fills iframe; removes extra purple area */
+  .chatbot-embed-fill {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: 0 !important;
   }
 }

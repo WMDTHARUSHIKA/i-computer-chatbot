@@ -65,9 +65,14 @@ const tryLocalFallback = (userText) => {
   return null;
 };
 
-const App = () => {
-  // ✅ toggler state
-  const [isOpen, setIsOpen] = useState(false);
+export default function App() {
+  // ✅ embed mode: when opened as https://.../?embed=1
+  const isEmbed =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("embed") === "1";
+
+  // ✅ In embed mode open immediately (no internal launcher click required)
+  const [isOpen, setIsOpen] = useState(isEmbed ? true : false);
 
   const [chatHistory, setChatHistory] = useState(() => loadHistory());
   const [isLoading, setIsLoading] = useState(false);
@@ -80,13 +85,28 @@ const App = () => {
     historyRef.current = chatHistory;
   }, [chatHistory]);
 
-  // Auto-scroll (only when popup is open)
+  // ✅ Add class to remove background in embed mode (CSS will handle it)
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isEmbed) return;
+
+    document.documentElement.classList.add("chat-embed");
+    document.body.classList.add("chat-embed");
+
+    return () => {
+      document.documentElement.classList.remove("chat-embed");
+      document.body.classList.remove("chat-embed");
+    };
+  }, [isEmbed]);
+
+  // Auto-scroll when open (embed is always open)
+  useEffect(() => {
+    const openNow = isEmbed || isOpen;
+    if (!openNow) return;
+
     const el = chatBodyRef.current;
     if (!el) return;
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-  }, [chatHistory, isOpen]);
+  }, [chatHistory, isOpen, isEmbed]);
 
   // Persist
   useEffect(() => {
@@ -102,13 +122,14 @@ const App = () => {
     return () => abortRef.current?.abort?.();
   }, []);
 
-  // Abort + unlock input when closing popup
+  // Abort + unlock input when closing popup (NOT in embed mode)
   useEffect(() => {
+    if (isEmbed) return;
     if (!isOpen) {
       abortRef.current?.abort?.();
       setIsLoading(false);
     }
-  }, [isOpen]);
+  }, [isOpen, isEmbed]);
 
   const setPlaceholderText = (placeholderId, text, isError = false) => {
     setChatHistory((prev) =>
@@ -172,7 +193,7 @@ const App = () => {
           signal: controller.signal,
         });
 
-        // ✅ Silent retries (no retry message shown in chat)
+        // silent retries
         if (isBusyStatus(res.status)) {
           if (attempt < maxAttempts) {
             await sleep(800 * attempt);
@@ -235,8 +256,8 @@ const App = () => {
   const handleSend = (text) => {
     if (isLoading) return;
 
-    // ensure open when sending
-    if (!isOpen) setIsOpen(true);
+    // non-embed: ensure open when sending
+    if (!isEmbed && !isOpen) setIsOpen(true);
 
     setIsLoading(true);
 
@@ -255,60 +276,61 @@ const App = () => {
     generateBotResponse([...base, userMsg], placeholderId);
   };
 
-  const openChat = () => setIsOpen(true);
-  const closeChat = () => setIsOpen(false);
+  const ChatPopup = (
+    <div className={`chatbot-popup ${isEmbed ? "chatbot-embed-fill" : ""}`}>
+      <div className="chat-header">
+        <div className="header-info">
+          <div className="header-icon-container">
+            <ChatbotIcon className="text-white" />
+          </div>
+          <h2 className="logo-text">{companyInfo.name}</h2>
+        </div>
 
+        {/* ✅ hide close arrow in embed (close handled by website button) */}
+        {!isEmbed && (
+          <button
+            type="button"
+            className="material-symbols-rounded header-arrow"
+            onClick={() => setIsOpen(false)}
+            aria-label="Close chatbot"
+          >
+            keyboard_arrow_down
+          </button>
+        )}
+      </div>
+
+      <div className="chatbot-body" ref={chatBodyRef}>
+        {chatHistory.map((chat) => (
+          <ChatMessage key={chat.id} chat={chat} />
+        ))}
+      </div>
+
+      <div className="chat-footer">
+        <ChatForm onSend={handleSend} disabled={isLoading} />
+      </div>
+    </div>
+  );
+
+  // ✅ EMBED: show chat space immediately (no internal launcher / no purple screen)
+  if (isEmbed) {
+    return <div className="chatbot-embed-root">{ChatPopup}</div>;
+  }
+
+  // ✅ NORMAL (standalone chatbot site): toggler + popup
   return (
     <div className="chatbot-wrapper">
-      {/* ✅ Toggler button when closed */}
       {!isOpen && (
         <button
           type="button"
           className="chatbot-launcher"
-          onClick={openChat}
+          onClick={() => setIsOpen(true)}
           aria-label="Open chatbot"
         >
           <ChatbotIcon className="text-white" />
         </button>
       )}
 
-      {/* ✅ Popup when open */}
-      {isOpen && (
-        <div className="chatbot-popup">
-          {/* Header */}
-          <div className="chat-header">
-            <div className="header-info">
-              <div className="header-icon-container">
-                <ChatbotIcon className="text-white" />
-              </div>
-              <h2 className="logo-text">{companyInfo.name}</h2>
-            </div>
-
-            <button
-              type="button"
-              className="material-symbols-rounded header-arrow"
-              onClick={closeChat}
-              aria-label="Close chatbot"
-            >
-              keyboard_arrow_down
-            </button>
-          </div>
-
-          {/* Body */}
-          <div className="chatbot-body" ref={chatBodyRef}>
-            {chatHistory.map((chat) => (
-              <ChatMessage key={chat.id} chat={chat} />
-            ))}
-          </div>
-
-          {/* Footer */}
-          <div className="chat-footer">
-            <ChatForm onSend={handleSend} disabled={isLoading} />
-          </div>
-        </div>
-      )}
+      {isOpen && ChatPopup}
     </div>
   );
-};
-
-export default App;
+}
