@@ -1,8 +1,7 @@
 import ChatbotIcon from "./ChatbotIcon";
 
 export default function ChatMessage({ chat }) {
-  // bot: role === "model"
-  // user: role === "user"
+  // bot if role is "model"
   const isBot = chat.role === "model";
 
   return (
@@ -18,8 +17,15 @@ export default function ChatMessage({ chat }) {
       )}
 
       <div className="message-text-container">
-        <div className="message-text" style={{ whiteSpace: "pre-line" }}>
+        <div className="message-text" style={{ whiteSpace: "pre-wrap" }}>
           {chat.text}
+
+          {/* time/meta inside bubble like your image */}
+          {chat.time && (
+            <div className="message-meta">
+              {isBot ? `Automated · ${chat.time}` : chat.time}
+            </div>
+          )}
         </div>
       </div>
     </div>
