@@ -1,8 +1,9 @@
 import ChatbotIcon from "./ChatbotIcon";
 
 export default function ChatMessage({ chat }) {
-  const isBot = chat.role === "model"; // bot
-  // user example: chat.role === "user"
+  // bot: role === "model"
+  // user: role === "user"
+  const isBot = chat.role === "model";
 
   return (
     <div
@@ -20,9 +21,6 @@ export default function ChatMessage({ chat }) {
         <div className="message-text" style={{ whiteSpace: "pre-line" }}>
           {chat.text}
         </div>
-
-        {/* Optional (only shows if you pass chat.time) */}
-        {chat.time && <div className="message-meta">{chat.time}</div>}
       </div>
     </div>
   );
