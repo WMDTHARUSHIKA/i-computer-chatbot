@@ -1,16 +1,17 @@
 import ChatbotIcon from "./ChatbotIcon";
 
 export default function ChatMessage({ chat }) {
-  // bot if role is "model"
-  const isBot = chat.role === "model";
+  // ✅ sender = user (RIGHT), receiver = model/bot (LEFT)
+  const isSender = chat.role === "user";
 
   return (
     <div
-      className={`message ${isBot ? "bot-message" : "user-message"} ${
+      className={`message ${isSender ? "user-message" : "bot-message"} ${
         chat.isError ? "error" : ""
       }`}
     >
-      {isBot && (
+      {/* show avatar only for receiver (left) */}
+      {!isSender && (
         <div className="bot-icon-wrapper" aria-hidden="true">
           <ChatbotIcon />
         </div>
@@ -19,13 +20,6 @@ export default function ChatMessage({ chat }) {
       <div className="message-text-container">
         <div className="message-text" style={{ whiteSpace: "pre-wrap" }}>
           {chat.text}
-
-          {/* time/meta inside bubble like your image */}
-          {chat.time && (
-            <div className="message-meta">
-              {isBot ? `Automated · ${chat.time}` : chat.time}
-            </div>
-          )}
         </div>
       </div>
     </div>
