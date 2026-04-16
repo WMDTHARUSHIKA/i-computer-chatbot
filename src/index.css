@@ -18,12 +18,9 @@
     margin: 0;
     min-height: 100vh;
     font-family: "Inter", sans-serif;
-
-    /* Normal (non-embed) background */
     background: #f1f0e9;
   }
 
-  /* ✅ When loaded inside iframe as ?embed=1 */
   body.chat-embed {
     background: transparent !important;
     min-height: 0 !important;
@@ -31,12 +28,10 @@
 }
 
 @layer components {
-  /* Bottom-right widget area */
   .chatbot-wrapper {
     @apply fixed bottom-8 right-8 z-50 flex flex-col items-end;
   }
 
-  /* Launcher button */
   .chatbot-launcher {
     @apply w-12 h-12 rounded-full flex items-center justify-center transition-colors;
     background: #000000;
@@ -47,23 +42,14 @@
     background: #111111;
   }
 
-  /* Popup card */
   .chatbot-popup {
-    /* ✅ Increased height */
-    @apply w-[360px] h-[720px] overflow-hidden flex flex-col border;
-
+    @apply w-[360px] h-[560px] overflow-hidden flex flex-col border;
     background: #f1f0e9;
     border-color: rgba(0, 0, 0, 0.12);
     border-radius: 22px;
-
-    /* ✅ Remove blur-ish shadow (set to none). If you want shadow, reduce it instead. */
-    box-shadow: none;
-
-    /* ✅ Prevent going outside screen */
-    max-height: calc(100vh - 64px);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
   }
 
-  /* Header */
   .chat-header {
     @apply px-5 py-4 flex items-center justify-between;
     background: #000000;
@@ -95,7 +81,7 @@
 
   /* Body */
   .chatbot-body {
-    @apply flex-1 overflow-y-auto px-5 py-5 space-y-5;
+    @apply flex-1 overflow-y-auto px-5 py-5 space-y-4;
     background: #f1f0e9;
   }
 
@@ -108,19 +94,19 @@
     border: 3px solid #f1f0e9;
   }
 
-  /* Messages */
+  /* ✅ Two-side messages */
   .message {
-    @apply w-full flex items-end gap-2;
+    @apply w-full flex gap-2;
   }
 
-  /* Receiver (bot/model) LEFT */
+  /* Receiver (bot) LEFT */
   .bot-message {
-    @apply justify-start flex-row;
+    @apply justify-start items-end flex-row;
   }
 
   /* Sender (user) RIGHT */
   .user-message {
-    @apply justify-end flex-row-reverse;
+    @apply justify-end items-end flex-row-reverse;
   }
 
   .bot-icon-wrapper {
@@ -130,7 +116,14 @@
   }
 
   .message-text-container {
-    @apply max-w-[78%];
+    @apply max-w-[78%] flex flex-col;
+  }
+
+  .bot-message .message-text-container {
+    @apply items-start;
+  }
+  .user-message .message-text-container {
+    @apply items-end;
   }
 
   .message-text {
@@ -140,22 +133,21 @@
     word-break: break-word;
   }
 
-  /* ✅ Bot bubble (SOLID WHITE - removed blur/transparency) */
+  /* Receiver bubble (left) */
   .bot-message .message-text {
-    background: #ffffff; /* was rgba(...,0.6) */
+    background: rgba(255, 255, 255, 0.6);
     color: #000000;
-    border-bottom-left-radius: 6px;
+    border-bottom-left-radius: 8px;
   }
 
-  /* User bubble (solid) */
+  /* Sender bubble (right) */
   .user-message .message-text {
     background: #000000;
     color: #f1f0e9;
     border-color: rgba(0, 0, 0, 0.22);
-    border-bottom-right-radius: 6px;
+    border-bottom-right-radius: 8px;
   }
 
-  /* Error state */
   .error .message-text {
     background: #fff1f1;
     color: #b00020;
@@ -197,30 +189,14 @@
     @apply opacity-70 cursor-not-allowed;
   }
 
-  /* ✅ EMBED MODE helpers */
-  .chatbot-embed-root {
-    width: 100%;
-    height: 100%;
-  }
-
-  .chatbot-embed-fill {
-    width: 100% !important;
-    height: 100% !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    border: 0 !important;
-  }
-
   /* Mobile */
   @media (max-width: 420px) {
     .chatbot-wrapper {
       @apply bottom-4 right-4 left-4 items-stretch;
     }
 
-    /* ✅ Increased height on mobile too */
     .chatbot-popup {
-      @apply w-auto h-[82vh];
-      max-height: calc(100vh - 24px);
+      @apply w-auto h-[74vh];
     }
 
     .chatbot-launcher {
