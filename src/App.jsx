@@ -12,7 +12,7 @@ const makeId = () =>
     ? crypto.randomUUID()
     : String(Date.now() + Math.random());
 
-const DEFAULT_HISTORY = [
+const createDefaultHistory = () => [
   {
     id: makeId(),
     role: "model",
@@ -28,28 +28,19 @@ const DEFAULT_HISTORY = [
   },
 ];
 
-const QUICK_QUESTIONS = [
-  "When will my order ship?",
-  "Track my order",
-  "What is your contact info?",
-  "What is your exchange policy?",
-  "How long does shipping take?",
-  "Can I change my shipping address after placing an order?",
-];
-
 function loadHistory() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return DEFAULT_HISTORY;
+    if (!raw) return createDefaultHistory();
 
     const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed) || parsed.length === 0) return DEFAULT_HISTORY;
+    if (!Array.isArray(parsed) || parsed.length === 0) return createDefaultHistory();
 
     return parsed
       .filter((m) => m && typeof m.role === "string" && typeof m.text === "string")
       .map((m) => ({ ...m, isError: Boolean(m.isError) }));
   } catch {
-    return DEFAULT_HISTORY;
+    return createDefaultHistory();
   }
 }
 
@@ -80,14 +71,11 @@ export default function App() {
     typeof window !== "undefined" &&
     new URLSearchParams(window.location.search).get("embed") === "1";
 
-  // ✅ In embed mode open immediately
+  // ✅ In embed mode open immediately (no internal launcher click required)
   const [isOpen, setIsOpen] = useState(isEmbed ? true : false);
 
   const [chatHistory, setChatHistory] = useState(() => loadHistory());
   const [isLoading, setIsLoading] = useState(false);
-
-  // ✅ SIMPLE: show the "Instant answers" screen first
-  const [showHome, setShowHome] = useState(true);
 
   const chatBodyRef = useRef(null);
   const historyRef = useRef(chatHistory);
@@ -97,7 +85,7 @@ export default function App() {
     historyRef.current = chatHistory;
   }, [chatHistory]);
 
-  // ✅ Add class in embed mode (CSS handles background)
+  // ✅ Add class to remove background in embed mode (CSS will handle it)
   useEffect(() => {
     if (!isEmbed) return;
 
@@ -110,16 +98,15 @@ export default function App() {
     };
   }, [isEmbed]);
 
-  // Auto-scroll (only when not on home screen)
+  // Auto-scroll when open (embed is always open)
   useEffect(() => {
     const openNow = isEmbed || isOpen;
     if (!openNow) return;
-    if (showHome) return;
 
     const el = chatBodyRef.current;
     if (!el) return;
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-  }, [chatHistory, isOpen, isEmbed, showHome]);
+  }, [chatHistory, isOpen, isEmbed]);
 
   // Persist
   useEffect(() => {
@@ -141,9 +128,26 @@ export default function App() {
     if (!isOpen) {
       abortRef.current?.abort?.();
       setIsLoading(false);
-      setShowHome(true); // ✅ go back to home when closed
     }
   }, [isOpen, isEmbed]);
+
+  // ✅ NEW: reset/refresh chat history
+  const handleResetChat = () => {
+    // Optional confirm (remove if you don't want popup)
+    const ok = window.confirm("Clear chat history?");
+    if (!ok) return;
+
+    abortRef.current?.abort?.();
+    setIsLoading(false);
+
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // ignore
+    }
+
+    setChatHistory(createDefaultHistory());
+  };
 
   const setPlaceholderText = (placeholderId, text, isError = false) => {
     setChatHistory((prev) =>
@@ -152,8 +156,8 @@ export default function App() {
   };
 
   const generateBotResponse = async (historyForApi, placeholderId) => {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    const apiUrlFromEnv = import.meta.env.VITE_API_URL;
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY; // preferred
+    const apiUrlFromEnv = import.meta.env.VITE_API_URL; // optional
 
     const endpoint =
       apiUrlFromEnv ||
@@ -174,6 +178,7 @@ export default function App() {
       return;
     }
 
+    // cancel any in-flight request
     abortRef.current?.abort?.();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -183,7 +188,7 @@ export default function App() {
 
     const context = buildCompanyContext();
     const contents = [
-      { role: "user", parts: [{ text: context }] },
+      { role: "user", parts: [{ text: context }] }, // context only for API
       ...historyForApi.map((m) => ({
         role: m.role,
         parts: [{ text: m.text }],
@@ -206,6 +211,7 @@ export default function App() {
           signal: controller.signal,
         });
 
+        // silent retries
         if (isBusyStatus(res.status)) {
           if (attempt < maxAttempts) {
             await sleep(800 * attempt);
@@ -271,20 +277,20 @@ export default function App() {
     // non-embed: ensure open when sending
     if (!isEmbed && !isOpen) setIsOpen(true);
 
-    // ✅ when sending: go to chat screen
-    setShowHome(false);
     setIsLoading(true);
 
     const userMsg = { id: makeId(), role: "user", text, isError: false };
     const placeholderId = makeId();
     const base = historyRef.current;
 
+    // UI: user message + placeholder once
     setChatHistory([
       ...base,
       userMsg,
       { id: placeholderId, role: "model", text: "Thinking...", isError: false },
     ]);
 
+    // API: don't include placeholder
     generateBotResponse([...base, userMsg], placeholderId);
   };
 
@@ -298,61 +304,37 @@ export default function App() {
           <h2 className="logo-text">{companyInfo.name}</h2>
         </div>
 
-        {!isEmbed && (
+        {/* ✅ NEW: Header actions (Refresh + Close) */}
+        <div className="flex items-center gap-2">
           <button
             type="button"
-            className="material-symbols-rounded header-arrow"
-            onClick={() => setIsOpen(false)}
-            aria-label="Close chatbot"
+            className="material-symbols-rounded header-action-btn"
+            onClick={handleResetChat}
+            aria-label="Refresh chat"
+            title="Refresh chat"
           >
-            keyboard_arrow_down
+            refresh
           </button>
-        )}
+
+          {/* ✅ hide close arrow in embed (close handled by website button) */}
+          {!isEmbed && (
+            <button
+              type="button"
+              className="material-symbols-rounded header-arrow"
+              onClick={() => setIsOpen(false)}
+              aria-label="Close chatbot"
+              title="Close"
+            >
+              keyboard_arrow_down
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="chatbot-body" ref={chatBodyRef}>
-        {showHome ? (
-          <div className="space-y-5">
-            {/* Black top card */}
-            <div className="rounded-2xl bg-black text-[#f1f0e9] p-5">
-              <div className="text-2xl font-semibold">Chat with us</div>
-              <div className="mt-2 text-sm opacity-90">
-                👋 Hi, message us with any questions. We're happy to help!
-              </div>
-
-              <button
-                type="button"
-                className="mt-5 w-full rounded-xl py-3 font-semibold bg-white/30 hover:bg-white/40 transition-colors"
-                onClick={() => setShowHome(false)}
-              >
-                Return to chat
-              </button>
-            </div>
-
-            {/* Quick questions */}
-            <div className="text-center font-semibold text-black">Instant answers</div>
-
-            <div className="space-y-3">
-              {QUICK_QUESTIONS.map((q) => (
-                <button
-                  key={q}
-                  type="button"
-                  className="w-full text-left rounded-xl px-4 py-4 border border-black/30 bg-white hover:bg-white/70 transition-colors text-black/70 hover:text-black"
-                  onClick={() => handleSend(q)}
-                  disabled={isLoading}
-                >
-                  {q}
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {chatHistory.map((chat) => (
-              <ChatMessage key={chat.id} chat={chat} />
-            ))}
-          </div>
-        )}
+        {chatHistory.map((chat) => (
+          <ChatMessage key={chat.id} chat={chat} />
+        ))}
       </div>
 
       <div className="chat-footer">
@@ -373,10 +355,7 @@ export default function App() {
         <button
           type="button"
           className="chatbot-launcher"
-          onClick={() => {
-            setIsOpen(true);
-            setShowHome(true); // show home when opened
-          }}
+          onClick={() => setIsOpen(true)}
           aria-label="Open chatbot"
         >
           <ChatbotIcon className="text-white" />

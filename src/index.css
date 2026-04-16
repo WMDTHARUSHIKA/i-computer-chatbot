@@ -56,10 +56,10 @@
     border-color: rgba(0, 0, 0, 0.12);
     border-radius: 22px;
 
-    /* ✅ Remove blur-ish shadow (set to none). If you want shadow, reduce it instead. */
+    /* ✅ remove blur-ish shadow */
     box-shadow: none;
 
-    /* ✅ Prevent going outside screen */
+    /* ✅ prevent going outside screen */
     max-height: calc(100vh - 64px);
   }
 
@@ -90,6 +90,16 @@
     color: rgba(241, 240, 233, 0.85);
   }
   .header-arrow:hover {
+    color: #f1f0e9;
+  }
+
+  /* ✅ Refresh button in header */
+  .header-action-btn {
+    @apply w-9 h-9 rounded-full flex items-center justify-center transition-colors;
+    color: rgba(241, 240, 233, 0.9);
+  }
+  .header-action-btn:hover {
+    background: rgba(241, 240, 233, 0.12);
     color: #f1f0e9;
   }
 
@@ -140,14 +150,14 @@
     word-break: break-word;
   }
 
-  /* ✅ Bot bubble (SOLID WHITE - removed blur/transparency) */
+  /* ✅ Bot bubble (solid white - no blur) */
   .bot-message .message-text {
-    background: #ffffff; /* was rgba(...,0.6) */
+    background: #ffffff;
     color: #000000;
     border-bottom-left-radius: 6px;
   }
 
-  /* User bubble (solid) */
+  /* User bubble */
   .user-message .message-text {
     background: #000000;
     color: #f1f0e9;
@@ -217,7 +227,6 @@
       @apply bottom-4 right-4 left-4 items-stretch;
     }
 
-    /* ✅ Increased height on mobile too */
     .chatbot-popup {
       @apply w-auto h-[82vh];
       max-height: calc(100vh - 24px);
